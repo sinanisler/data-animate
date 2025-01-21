@@ -1,0 +1,15 @@
+{
+  "name": "data-animate",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "peerDependencies": {
+    "gsap": "^3.12.7",
+    "scrolltrigger": "^1.0.1"
+  }
+}
