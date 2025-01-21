@@ -1,47 +1,56 @@
 # data-animate
 
-HTML dom only scroll and gsap animations.
+HTML DOM-based scroll and GSAP animations.
 
-I insprired from htmx and made this. I like coding css and with just simple html and css knowledge it is possible to make so many scroll trigger animations with this 😎
+I was inspired by htmx and created this. I enjoy coding in CSS, and with just basic HTML and CSS knowledge, it's possible to create numerous scroll-triggered animations using this 😎.
 
-I coded this script first for my site building and simple gsap or scroll animations but then it started to become very powerful.
+Initially, I coded this script for my site-building needs and for simple GSAP or scroll animations. Over time, it started becoming very powerful.
 
+I'm still working on it and testing it in production as well.
 
-I am still working on it and testing on prod as well.
+This is the initial release. Most features are stable, but I’m still refining it. I’m thinking about resolving the FOUC (Flash of Unstyled Content) problem, though I’m not sure how to implement that yet. I’ll need to run more tests.
 
-This is initial release most features are stable but I am still working on it I am thinking to resolve the FOUC problem but not sure how to implement that yet I need to make more tests.
+If anyone would like to help, please don’t hesitate to contribute or submit a PR. 
 
-if anyone would like to help please do not hesitate to contribute and pr 
+I’m quite busy with agency work sometimes. :(
 
-I am very  busy with agency work sometimes. :(
-
-
----- > https://github.com/sinanisler/data-animate
+--- > [GitHub: sinanisler/data-animate](https://github.com/sinanisler/data-animate)
 
 
-# Requrements
 
-It just needs gsap.js and scrolltrigger.js thats it.
+## Requirements
 
-I am thinking supporting other js libs for other features but abstraction needs to stay clean like this and very smart otherwise it may become a hastle code animations.
+It only requires `gsap.js` and `scrolltrigger.js`. That’s it.
 
+I’m considering supporting other JS libraries for additional features, but abstraction needs to stay clean and smart like this. Otherwise, coding animations could become a hassle.
 
-# How it Works ?
+---
 
-Simple just 
+## How it Works?
 
-simple example;
-`<div data-animate="opacity:0"></div>`
+It’s simple! 
 
-style start and end exaple for almost any css;
-`<div data-animate="style_start-color:red,style_end-color:green"></div>`  
+### Basic Example
+```html
+<div data-animate="opacity:0"></div>
+```
 
-animation chaining example;
-`<div data-animate="style_start-color:red,style_end-color:green ; opacity:0"></div>`  
+### Style Start and End Example
+This works for almost any CSS property:
+```html
+<div data-animate="style_start-color:red,style_end-color:green"></div>
+```
 
-thats it. 
+### Animation Chaining Example
+You can chain multiple animations:
+```html
+<div data-animate="style_start-color:red,style_end-color:green; opacity:0"></div>
+```
 
-have fun.
+And that’s it!
+
+Have fun!
+
 
 
 # Features 
