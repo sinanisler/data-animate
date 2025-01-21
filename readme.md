@@ -1,7 +1,8 @@
 # data-animate
 
+HTML dom only scroll and gsap animations.
 
-dom only scroll and gsap animations
+I insprired from htmx and made this. I like coding css and with just simple html and css knowledge it is possible to make so many scroll trigger animations with this 😎
 
 I coded this script first for my site building and simple gsap or scroll animations but then it started to become very powerful.
 
