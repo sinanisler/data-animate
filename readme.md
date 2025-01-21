@@ -1,28 +1,46 @@
 # data-animate
 
+
 dom only scroll and gsap animations
 
 I coded this script first for my site building and simple gsap or scroll animations but then it started to become very powerful.
-
 
 
 I am still working on it and testing on prod as well.
 
 This is initial release most features are stable but I am still working on it I am thinking to resolve the FOUC problem but not sure how to implement that yet I need to make more tests.
 
-if anyone would like to help please do and dont hesitate to contribute I am very very busy with agency work sometimes.
+if anyone would like to help please do not hesitate to contribute and pr 
 
+I am very  busy with agency work sometimes. :(
+
+
+---- > https://github.com/sinanisler/data-animate
+
+
+# Requrements
+
+It just needs gsap.js and scrolltrigger.js thats it.
+
+I am thinking supporting other js libs for other features but abstraction needs to stay clean like this and very smart otherwise it may become a hastle code animations.
 
 
 # How it Works ?
 
 Simple just 
 
+simple example;
 `<div data-animate="opacity:0"></div>`
 
-`<div data-animate="style_start-color:red,style_end-color:green"></div>` ...etc 
+style start and end exaple for almost any css;
+`<div data-animate="style_start-color:red,style_end-color:green"></div>`  
 
-thats it.
+animation chaining example;
+`<div data-animate="style_start-color:red,style_end-color:green ; opacity:0"></div>`  
+
+thats it. 
+
+have fun.
 
 
 # Features 
