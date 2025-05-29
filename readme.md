@@ -1,113 +1,169 @@
+
+
 # data-animate
 
-HTML DOM-based scroll and GSAP animations.
+**Simple, declarative scroll & GSAP animations for HTML DOM.**
 
-I was inspired by htmx and created this. I enjoy coding in CSS, and with just basic HTML and CSS knowledge, it's possible to create numerous scroll-triggered animations using this 😎.
+I created **data-animate** to enable powerful GSAP/ScrollTrigger animations using only HTML and CSS knowledge. Inspired by [htmx](https://htmx.org), it lets you add advanced animations to your website without writing JavaScript for each effect.
 
-Initially, I coded this script for my site-building needs and for simple GSAP or scroll animations. Over time, it started becoming very powerful.
+This project started as a tool for my own site-building workflow and has grown into a robust, production-ready utility. Most features are stable, but ongoing improvements and testing are happening—feedback and contributions are welcome!
 
-I'm still working on it and testing it in production as well.
-
-This is the initial release. Most features are stable, but I’m still refining it. I’m thinking about resolving the FOUC (Flash of Unstyled Content) problem, though I’m not sure how to implement that yet. I’ll need to run more tests.
-
-If anyone would like to help, please don’t hesitate to contribute or submit a PR. 
-
-I’m quite busy with agency work sometimes. :(
-
---- > [GitHub: sinanisler/data-animate](https://github.com/sinanisler/data-animate)
-
-
-
-## Requirements
-
-It only requires `gsap.js` and `scrolltrigger.js`. That’s it.
-
-I’m considering supporting other JS libraries for additional features, but abstraction needs to stay clean and smart like this. Otherwise, coding animations could become a hassle.
+If you want to help, open a [GitHub issue](https://github.com/sinanisler/data-animate/issues) or submit a pull request.
+**[View on GitHub → sinanisler/data-animate](https://github.com/sinanisler/data-animate)**
 
 ---
 
-## How it Works?
+## Requirements
 
-It’s simple! 
+* [GSAP (GreenSock Animation Platform)](https://greensock.com/gsap/)
+* [GSAP ScrollTrigger plugin](https://greensock.com/scrolltrigger/)
+
+No other dependencies required!
+
+---
+
+## How It Works
+
+Just add a `data-animate` attribute to any HTML element and describe your animation(s) using simple, comma-separated property pairs.
 
 ### Basic Example
+
 ```html
 <div data-animate="opacity:0"></div>
 ```
 
-### Style Start and End Example
-This works for almost any CSS property:
+### Styling Start and End Example
+
 ```html
 <div data-animate="style_start-color:red,style_end-color:green"></div>
 ```
 
-### Animation Chaining Example
-You can chain multiple animations:
+### Chained Animations
+
+Chain multiple animation steps with semicolons:
+
 ```html
 <div data-animate="style_start-color:red,style_end-color:green; opacity:0"></div>
 ```
 
-And that’s it!
-
-Have fun!
-
-
-
-# Features 
-
-
-
- 
-# Main `data-animate` Properties
-
-| **Property**          | **Description**                                                                                          | **Example Value**        |
-|-----------------------|----------------------------------------------------------------------------------------------------------|--------------------------|
-| `style_start-*`       | Initial CSS styles applied before the animation starts. Replace `*` with the CSS property name. All JavaScript style CSS objects work (e.g., `fontSize`, `borderWidth`, `backgroundColor`). You can set these dynamically. If omitted, the element’s initial DOM state will be used as `style_start`. | `style_start-fontSize:20px`  |
-| `style_end-*`         | Final CSS styles applied after the animation ends. Replace `*` with the CSS property name. Works with any valid JavaScript CSS style property. | `style_end-color:blue`   |
-| `scroll:false`        | Disables scroll-based triggers, making the animation play only on manual or programmatic triggers.       | `scroll:false`           |
-| `splittext`           | Splits the element’s text into characters wrapped in spans, enabling animations per character.            | `splittext:true`         |
-| `start`               | Defines the start point of the scroll-triggered animation in ScrollTrigger format.                       | `start:'top 60%'`        |
-| `end`                 | Defines the end point of the scroll-triggered animation in ScrollTrigger format.                         | `end:'bottom 40%'`       |
-| `x`                   | Defines the horizontal translation distance in pixels. Positive values move right, negative move left.   | `x:100`                  |
-| `y`                   | Defines the vertical translation distance in pixels. Positive values move down, negative move up.        | `y:-50`                  |
-| `o`, `opacity`        | Specifies the opacity of the element. Values range from `0` (transparent) to `1` (fully visible).         | `o:0.5` or `opacity:0.8` |
-| `s`, `scale`          | Sets the scale of the element. Values below `1` shrink the element, and values above `1` enlarge it.      | `s:1.5` or `scale:0.8`   |
-| `r`, `rotate`         | Defines the rotation of the element in degrees. Positive values rotate clockwise, negative counterclockwise. | `r:90` or `rotate:-45`   |
-| `duration`            | Duration of the animation in seconds.                                                                    | `duration:2s`            |
-| `delay`               | Delay before the animation starts, in seconds.                                                           | `delay:0.5s`             |
-| `stagger`             | Time delay between the animations of child elements when `splittext` is used.                            | `stagger:0.2`            |
-| `scroll`              | Enables or disables scroll-triggered animation. Use `true` to enable scroll-based triggers.              | `scroll:true`            |
-| `trigger`             | Specifies whether the animation is manually triggered (e.g., via a button or link).                     | `trigger:true`           |
-| `scrub`               | Determines whether the animation is scrubbed (linked to the scroll progress). Can be `true`, `false`, or a number indicating scrub delay. | `scrub:true` or `scrub:1` |
-| `pin`                 | Specifies whether the element is pinned during the animation.                                            | `pin:true`               |
-| `markers`             | Enables or disables debugging markers for ScrollTrigger.                                                 | `markers:true`           |
-| `toggleClass`         | A CSS class to toggle when the animation starts or ends.                                                 | `toggleClass:'active'`   |
-| `pinSpacing`          | Controls spacing behavior when an element is pinned.                                                     | `pinSpacing:'margin'`    |
+And that’s it! You can create complex scroll-based or programmatic animations without JavaScript.
 
 ---
 
-## Key Notes About `style_start` and `style_end`
+## Features
 
-1. **JavaScript Style Compatibility**:
-   - Both `style_start` and `style_end` work seamlessly with any valid JavaScript CSS style object.
-   - Examples include `fontSize`, `borderWidth`, `borderColor`, `backgroundColor`, and many more.
-   - Check this [CSS Reference](https://www.w3schools.com/cssref/index.php) and [CodePen Example](https://codepen.io/sinanisler/pen/XJrzqoY) for a complete list of "most" supported styles. (I dont have time to test all so thats why most supported not all)
-
-2. **Optional `style_start`**:
-   - If `style_start` is not provided, the element’s current state in the DOM will automatically be used as the starting style.
-   - This simplifies animations where you only need to define the final state (`style_end`).
-   - **Personal Recommendation**: Many developers set all initial styles in the DOM (e.g., using CSS frameworks like Bricks) and only define the `style_end`. This approach is minimalistic and efficient.
+* **Declarative:** Animate with attributes in your HTML.
+* **Works with GSAP + ScrollTrigger:** Full power of these libraries, zero boilerplate.
+* **Chain Animations:** Sequence multiple animation steps.
+* **Split Text Animations:** Animate by character, word, or line.
+* **Device-Aware:** Enable/disable animations on desktop, tablet, or mobile.
+* **Trigger Manually:** Trigger any animation with a click via `data-trigger`.
+* **Advanced Scroll Settings:** Supports ScrollTrigger’s `start`, `end`, `scrub`, `pin`, and more.
+* **Custom Easing, Duration, Delay, Stagger:** All common animation controls.
+* **Programmatic Control:** Play, pause, loop, and repeat animations as needed.
+* **No JS Required for Typical Use:** Just markup and optional CSS!
 
 ---
 
-# Separate Table for `data-trigger`
+## Usage
 
-| **Property**          | **Description**                                                                                          | **Example Value**        |
-|-----------------------|----------------------------------------------------------------------------------------------------------|--------------------------|
-| `data-trigger`        | Specifies the CSS selector of the target element whose animation will be triggered on the trigger element's click event. | `data-trigger: '#myDiv'` |
-| **Trigger Element Behavior** | When a `data-trigger` is defined, the trigger element listens for a `click` event. When clicked, it looks up the target element defined in the `data-trigger` value. If the target element has a GSAP animation instance, the animation will be played from the start (`play(0)`). |                      |
-| **Target Element**    | The target element must have an animation instance created by the `data-animate` attribute for the trigger to work. |                      |
+Add `gsap.js`, `ScrollTrigger.js`, and your `data-animate` script. Then use the attributes below.
 
+---
 
+### Main `data-animate` Properties
 
+| Property        | Description                                                                   | Example Value               |
+| --------------- | ----------------------------------------------------------------------------- | --------------------------- |
+| `style_start-*` | Initial CSS style(s) before animation. Use JS-style property names.           | `style_start-fontSize:20px` |
+| `style_end-*`   | Final CSS style(s) after animation. Use JS-style property names.              | `style_end-color:blue`      |
+| `scroll:false`  | Disables scroll trigger. Animation only runs manually/programmatically.       | `scroll:false`              |
+| `splittext`     | Splits text for character/word/line animation. Use `true`, `word`, or `line`. | `splittext:true`            |
+| `start`         | ScrollTrigger’s start value.                                                  | `start:top 60%`             |
+| `end`           | ScrollTrigger’s end value.                                                    | `end:bottom 40%`            |
+| `x`             | Horizontal translation (pixels).                                              | `x:100`                     |
+| `y`             | Vertical translation (pixels).                                                | `y:-50`                     |
+| `o`, `opacity`  | Opacity (0 = transparent, 1 = visible).                                       | `o:0.5` / `opacity:0.8`     |
+| `s`, `scale`    | Scale factor (1 = normal).                                                    | `s:1.5` / `scale:0.8`       |
+| `r`, `rotate`   | Rotation (degrees).                                                           | `r:90` / `rotate:-45`       |
+| `duration`      | Animation duration (seconds).                                                 | `duration:2s`               |
+| `delay`         | Delay before animation (seconds).                                             | `delay:0.5s`                |
+| `stagger`       | Delay between staggered children (seconds).                                   | `stagger:0.2`               |
+| `scroll`        | Enables/disables scroll-triggered animation (`true` or `false`).              | `scroll:true`               |
+| `trigger`       | Enables manual triggering (e.g., by click).                                   | `trigger:true`              |
+| `scrub`         | Links animation progress to scroll (`true`, `false`, or number for delay).    | `scrub:true` / `scrub:1`    |
+| `pin`           | Pins element during scroll.                                                   | `pin:true`                  |
+| `markers`       | Enables debugging markers.                                                    | `markers:true`              |
+| `toggleClass`   | Adds/removes a class when animation starts/ends.                              | `toggleClass:active`        |
+| `pinSpacing`    | Spacing mode for pinned elements.                                             | `pinSpacing:margin`         |
+| `desktop`       | Enables/disables animation on desktop (`true`/`false`).                       | `desktop:false`             |
+| `tablet`        | Enables/disables animation on tablet (`true`/`false`).                        | `tablet:true`               |
+| `mobile`        | Enables/disables animation on mobile (`true`/`false`).                        | `mobile:false`              |
+| `ease`          | Easing function for the animation.                                            | `ease:power1.inOut`         |
+| `rand`          | Randomizes `x`, `y`, or `rotate` values if set to `true`.                     | `rand:true`                 |
+| `loop`          | Loops animation if scroll is disabled.                                        | `loop:true`                 |
 
+**Note:** All properties can be chained using semicolons `;` for multi-step animations.
+
+---
+
+### About `style_start` and `style_end`
+
+* Any valid JavaScript-style CSS property can be animated.
+* If `style_start` is omitted, the current DOM style is used as the starting state.
+* You can set initial styles in your CSS framework or markup and only define the `style_end` for minimal config.
+
+---
+
+## Manual Animation Trigger
+
+You can manually trigger animations using the `data-trigger` attribute:
+
+| Property       | Description                                                                         | Example Value           |
+| -------------- | ----------------------------------------------------------------------------------- | ----------------------- |
+| `data-trigger` | CSS selector of the element whose animation will play when this element is clicked. | `data-trigger:"#myDiv"` |
+
+**How it works:**
+
+* Add `data-trigger="#targetElement"` to any clickable element.
+* When clicked, it will play the GSAP animation of the target element with `data-animate`.
+
+---
+
+## Examples
+
+```html
+<!-- Scroll-triggered fade in -->
+<div data-animate="opacity:0,style_end-opacity:1"></div>
+
+<!-- Manual trigger on button click -->
+<div id="targetDiv" data-animate="x:-200,style_end-x:0,scroll:false"></div>
+<button data-trigger="#targetDiv">Animate!</button>
+
+<!-- Animate each character with stagger -->
+<h2 data-animate="splittext:true,opacity:0,style_end-opacity:1,stagger:0.04"></h2>
+```
+
+---
+
+## Contributing
+
+* Code improvements, bug fixes, and PRs are welcome!
+* If you have feature requests, suggestions, or want to help with FOUC (Flash of Unstyled Content), please submit an issue or PR.
+
+---
+
+## License
+
+MIT
+
+---
+
+## Credits
+
+Built and maintained by [@sinanisler](https://github.com/sinanisler).
+Inspiration: [htmx](https://htmx.org), [GSAP](https://greensock.com/gsap/).
+
+---
+
+**Happy animating!** 🎉
