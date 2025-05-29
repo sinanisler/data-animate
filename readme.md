@@ -155,7 +155,7 @@ You can manually trigger animations using the `data-trigger` attribute:
 
 ## License
 
-MIT
+GPL
 
 ---
 
