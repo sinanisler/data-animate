@@ -645,12 +645,37 @@ Works with both regular scroll animations and timelines created with `trigger:tr
 
 You can create or update animations in JavaScript without writing GSAP code directly.
 
-```
-// Select by CSS selector, Element, or NodeList
-createDataAnimate('#hero', 'y:80,opacity:0,style_end-y:0,style_end-opacity:1');
 
-// Build a paused timeline and control it
-createDataAnimate('#card', 'trigger:true, t_start:0, x:-60, style_end-padding:0; t_start:0.8, opacity:0, style_end-opacity:1');
+```js
+// 1. Simple fade in on scroll
+createDataAnimate('#fadeIn', 'opacity:0,style_end-opacity:1');
+
+// 2. Slide up and fade in with custom duration
+createDataAnimate('.slideUp', 'y:60,opacity:0,style_end-y:0,style_end-opacity:1,duration:1.2');
+
+// 3. Manual trigger: animate when needed
+createDataAnimate(document.getElementById('box'), 'x:200,style_end-x:0,scroll:false');
+
+// 4. Staggered character animation with splittext
+createDataAnimate('.headline', 'splittext:true,opacity:0,style_end-opacity:1,stagger:0.06');
+
+// 5. Multi-step timeline with custom easing and delay
+createDataAnimate('#multiStep', 'trigger:true,t_start:0,scale:0.7,style_end-scale:1,ease:power2.out; t_start:0.8,opacity:0,style_end-opacity:1,delay:0.2');
+
+// 6. Animate only on desktop, skip on mobile/tablet
+createDataAnimate('.desktopOnly', 'opacity:0,style_end-opacity:1,desktop:true,tablet:false,mobile:false');
+
+// 7. Looping animation (infinite yoyo) without scroll
+createDataAnimate('#looping', 'y:40,style_end-y:0,scroll:false,loop:true,ease:bounce');
+
+// 8. Pin and color change with scroll
+createDataAnimate('#pinColor', 'pin:true,style_start-color:#333,style_end-color:#e74c3c');
+
+// 9. Animate each child with stagger (NodeList usage)
+createDataAnimate(document.querySelectorAll('.staggerItem'), 'y:30,style_end-y:0,opacity:0,style_end-opacity:1,stagger:0.15');
+
+// 10. Animate with custom scroll start/end and scrub
+createDataAnimate('#scrubDemo', 'x:-100,style_end-x:0,scrub:0.5,start:top 80%,end:bottom 60%');
 ```
 
 Notes:
