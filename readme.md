@@ -11,6 +11,19 @@ This project started as a tool for my own site-building workflow and has grown i
 If you want to help, open a [GitHub issue](https://github.com/sinanisler/data-animate/issues) or submit a pull request.
 **[View on GitHub → sinanisler/data-animate](https://github.com/sinanisler/data-animate)**
 
+## Shortcuts
+
+- [Requirements](#requirements)
+- [How It Works](#how-it-works)
+- [Features](#features)
+- [Usage](#usage)
+- [Main data-animate Properties](#main-data-animate-properties)
+- [Manual Animation Trigger](#manual-animation-trigger)
+- [Programmatic API](#programmatic-api)
+- [Examples](#examples)
+- [Contributing](#contributing)
+- [License](#license)
+
 ---
 
 ## Requirements
