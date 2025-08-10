@@ -1,10 +1,22 @@
 gsap.registerPlugin(ScrollTrigger);
 
+window.__createDataAnimateQueue = window.__createDataAnimateQueue || [];
+window.createDataAnimate = function (selector, animationString) {
+  if (typeof window.__createDataAnimateImpl === 'function') {
+    try {
+      window.__createDataAnimateImpl(selector, animationString);
+    } catch (e) {
+      console.error('createDataAnimate error:', e);
+    }
+  } else {
+    window.__createDataAnimateQueue.push([selector, animationString]);
+  }
+};
+
 window.onload = function () {
   setTimeout(() => {
     const animateElements = document.querySelectorAll('[data-animate]');
 
-    // -- DEVICE UTILS --
     function getDevice() {
       const width = window.innerWidth;
       if (width >= 991) return 'desktop';
@@ -73,6 +85,13 @@ window.onload = function () {
       return 0;
     }
 
+    function getTimelinePosition(options, index) {
+      if (options.t_start !== undefined) {
+        return options.t_start;
+      }
+      return index > 0 ? `+=${options.delay || 0}` : 0;
+    }
+
     animateElements.forEach(element => {
       const animations = element
         .getAttribute('data-animate')
@@ -87,7 +106,7 @@ window.onload = function () {
 
       if (firstOptions.trigger === 'true') {
         const timeline = gsap.timeline({ paused: true });
-        animations.forEach(animation => {
+        animations.forEach((animation, index) => {
           const options = parseAnimationOptions(animation);
           if (shouldDisableForDevice(options)) return; // skip this part if disabled
           const hasRotate = (options.startStyles.rotate !== undefined || options.endStyles.rotate !== undefined);
@@ -107,7 +126,9 @@ window.onload = function () {
             ...rotateProp,
             ...(options.o || options.opacity ? { opacity: parseFloat(options.o || options.opacity) } : {}),
             ...cleanEndStyles,
-            duration: options.duration || 1,
+            duration: options.t_end !== undefined && options.t_start !== undefined 
+              ? Math.max(0, options.t_end - options.t_start) 
+              : (options.duration || 1),
             delay: options.delay || 0,
             stagger: options.stagger ? getStaggerValue(options) : 0,
             ...(options.ease ? { ease: options.ease } : {}),
@@ -115,7 +136,8 @@ window.onload = function () {
           };
           timeline.to(
             splitText(element, options),
-            addVisibilityCallback(animationProps)
+            addVisibilityCallback(animationProps),
+            getTimelinePosition(options, index)
           );
         });
         element._gsapAnimationInstance = timeline;
@@ -145,7 +167,9 @@ window.onload = function () {
             ...rotateProp,
             ...(options.o || options.opacity ? { opacity: parseFloat(options.o || options.opacity) } : {}),
             ...cleanEndStyles,
-            duration: options.duration || 1,
+            duration: options.t_end !== undefined && options.t_start !== undefined 
+              ? Math.max(0, options.t_end - options.t_start) 
+              : (options.duration || 1),
             delay: options.delay || 0,
             stagger: options.stagger ? getStaggerValue(options) : 0,
             ...(options.ease ? { ease: options.ease } : {}),
@@ -157,7 +181,7 @@ window.onload = function () {
           timeline.to(
             splitText(element, options),
             addVisibilityCallback(animationProps),
-            index > 0 ? `+=${options.delay || 0}` : 0
+            getTimelinePosition(options, index)
           );
         });
         element._gsapAnimationInstance = timeline;
@@ -204,7 +228,9 @@ window.onload = function () {
           ...cleanEndStyles,
           scrollTrigger: scrollTriggerConfig !== false ? scrollTriggerConfig : null,
           stagger: options.stagger ? getStaggerValue(options) : 0,
-          duration: options.duration || 1,
+          duration: options.t_end !== undefined && options.t_start !== undefined 
+            ? Math.max(0, options.t_end - options.t_start) 
+            : (options.duration || 1),
           delay: options.delay || 0,
           paused: options.scroll === 'false',
           ...(options.ease ? { ease: options.ease } : {}),
@@ -259,12 +285,15 @@ window.onload = function () {
         }
         let key = option.substring(0, index).trim();
         let value = option.substring(index + 1).trim();
-        // ADD: device disable options support
         if (
           (key === 'desktop' || key === 'tablet' || key === 'mobile')
           && (value === 'false' || value === 'true')
         ) {
           acc[key] = value;
+          return acc;
+        }
+        if (key === 'once' && (value === 'true' || value === 'false')) {
+          acc.once = value === 'true';
           return acc;
         }
         if (key.startsWith('style_start-')) {
@@ -287,7 +316,7 @@ window.onload = function () {
           } else {
             acc.endStyles[cssProp] = value;
           }
-        } else if (key === 'duration' || key === 'delay') {
+        } else if (key === 'duration' || key === 'delay' || key === 't_start' || key === 't_end') {
           acc[key] = parseFloat(value.replace('s', ''));
         } else {
           acc[key] = value;
@@ -316,7 +345,8 @@ window.onload = function () {
         pinSpacing: options.pinSpacing || 'margin',
         invalidateOnRefresh: true,
         immediateRender: options.stagger ? false : true,
-        animation: gsap.timeline({ paused: true })
+        animation: gsap.timeline({ paused: true }),
+        ...(options.once !== undefined ? { once: options.once } : {})
       };
     }
 
@@ -422,6 +452,218 @@ window.onload = function () {
         }
       });
       return styleString.trim();
+    }
+
+    window.__createDataAnimateImpl = function (selector, animationString) {
+      let elements;
+      if (typeof selector === "string") {        elements = document.querySelectorAll(selector);      } 
+      else if (selector instanceof NodeList || Array.isArray(selector)) {        elements = selector;      } 
+      else if (selector instanceof Element) {        elements = [selector];      } 
+      else {        return;      }
+
+      elements.forEach(element => {
+        if (element._gsapAnimationInstance && typeof element._gsapAnimationInstance.kill === 'function') {
+          try { element._gsapAnimationInstance.kill(); } catch (e) {}
+        }
+
+        const animations = animationString
+          .split(';')
+          .map(a => a.trim())
+          .filter(Boolean);
+
+        if (animations.length === 0) return;
+
+        const firstOptions = parseAnimationOptions(animations[0]);
+        if (shouldDisableForDevice(firstOptions)) return;
+
+        // helper for building the rotate property + cleaning endStyles
+        function buildRotateAndClean(options) {
+          const hasRotate = (options.startStyles.rotate !== undefined || options.endStyles.rotate !== undefined);
+          const rotateProp = options.endStyles.rotate !== undefined
+            ? { rotate: parseFloat(options.endStyles.rotate) }
+            : (options.startStyles.rotate !== undefined
+                ? { rotate: 0 }
+                : (options.r || options.rotate
+                    ? { rotate: randomizeValue(options.r || options.rotate, options.rand === 'true') }
+                    : {}));
+          let cleanEndStyles = { ...options.endStyles };
+          delete cleanEndStyles.rotate;
+          return { hasRotate, rotateProp, cleanEndStyles };
+        }
+
+        // timeline-style (trigger:true)
+        if (firstOptions.trigger === 'true') {
+          const timeline = gsap.timeline({ paused: true });
+          animations.forEach((animation, index) => {
+            const options = parseAnimationOptions(animation);
+            if (shouldDisableForDevice(options)) return;
+            const { hasRotate, rotateProp, cleanEndStyles } = buildRotateAndClean(options);
+            const animationProps = {
+              ...(options.x ? { x: randomizeValue(options.x, options.rand === 'true') } : {}),
+              ...(options.y ? { y: randomizeValue(options.y, options.rand === 'true') } : {}),
+              ...(options.s || options.scale ? { scale: parseFloat(options.s || options.scale) } : {}),
+              ...rotateProp,
+              ...(options.o || options.opacity ? { opacity: parseFloat(options.o || options.opacity) } : {}),
+              ...cleanEndStyles,
+              duration: options.t_end !== undefined && options.t_start !== undefined 
+                ? Math.max(0, options.t_end - options.t_start) 
+                : (options.duration || 1),
+              delay: options.delay || 0,
+              stagger: options.stagger ? getStaggerValue(options) : 0,
+              ...(options.ease ? { ease: options.ease } : {}),
+              ...(hasRotate ? { force3D: false } : {})
+            };
+            timeline.to(
+              splitText(element, options),
+              addVisibilityCallback(animationProps),
+              getTimelinePosition(options, index)
+            );
+          });
+          element._gsapAnimationInstance = timeline;
+          return;
+        }
+
+        // multiple-segment timeline (animations.length > 1)
+        if (animations.length > 1) {
+          gsap.set(splitText(element, firstOptions), firstOptions.startStyles);
+          const timeline = gsap.timeline({
+            paused: firstOptions.scroll === 'false',
+            scrollTrigger: createScrollTriggerConfig(firstOptions, element)
+          });
+
+          animations.forEach((animation, index) => {
+            const options = parseAnimationOptions(animation);
+            if (shouldDisableForDevice(options)) return;
+            const { hasRotate, rotateProp, cleanEndStyles } = buildRotateAndClean(options);
+            const animationProps = {
+              ...(options.x ? { x: randomizeValue(options.x, options.rand === 'true') } : {}),
+              ...(options.y ? { y: randomizeValue(options.y, options.rand === 'true') } : {}),
+              ...(options.s || options.scale ? { scale: parseFloat(options.s || options.scale) } : {}),
+              ...rotateProp,
+              ...(options.o || options.opacity ? { opacity: parseFloat(options.o || options.opacity) } : {}),
+              ...cleanEndStyles,
+              duration: options.t_end !== undefined && options.t_start !== undefined 
+                ? Math.max(0, options.t_end - options.t_start) 
+                : (options.duration || 1),
+              delay: options.delay || 0,
+              stagger: options.stagger ? getStaggerValue(options) : 0,
+              ...(options.ease ? { ease: options.ease } : {}),
+              ...(hasRotate ? { force3D: false } : {})
+            };
+            if (options.stagger) {
+              animationProps.immediateRender = false;
+            }
+
+            timeline.to(
+              splitText(element, options),
+              addVisibilityCallback(animationProps),
+              getTimelinePosition(options, index)
+            );
+          });
+
+          element._gsapAnimationInstance = timeline;
+          if (firstOptions.scroll === 'false' && firstOptions.loop === 'true') {
+            timeline.repeat(-1).yoyo(true);
+          }
+          if (firstOptions.scroll === 'false') {
+            observeIfScrollFalse(element, timeline);
+          }
+          return;
+        }
+
+        // single animation (fromTo)
+        const options = parseAnimationOptions(animations[0]);
+        if (shouldDisableForDevice(options)) return;
+        const scrollTriggerConfig = createScrollTriggerConfig(options, element);
+        const { hasRotate, rotateProp: fromRotateProp } = (() => {
+          // build from rotate
+          return {
+            hasRotate: (options.startStyles.rotate !== undefined || options.endStyles.rotate !== undefined),
+            rotateProp: undefined
+          };
+        })();
+
+        let cleanStartStyles = { ...options.startStyles };
+        delete cleanStartStyles.rotate;
+        let cleanEndStyles = { ...options.endStyles };
+        delete cleanEndStyles.rotate;
+
+        const fromProps = {
+          ...(options.x ? { x: randomizeValue(options.x, options.rand === 'true') } : {}),
+          ...(options.y ? { y: randomizeValue(options.y, options.rand === 'true') } : {}),
+          ...(options.s || options.scale ? { scale: parseFloat(options.s || options.scale) } : {}),
+          ...(options.startStyles.rotate !== undefined
+            ? { rotate: parseFloat(options.startStyles.rotate) }
+            : (options.r || options.rotate
+                ? { rotate: randomizeValue(options.r || options.rotate, options.rand === 'true') }
+                : {})),
+          ...(options.o || options.opacity ? { opacity: parseFloat(options.o || options.opacity) } : {}),
+          ...cleanStartStyles,
+          ...( (options.startStyles.rotate !== undefined || options.endStyles.rotate !== undefined) ? { force3D: false } : {} )
+        };
+
+        const toProps = {
+          ...(options.x ? { x: 0 } : {}),
+          ...(options.y ? { y: 0 } : {}),
+          ...(options.s || options.scale ? { scale: 1 } : {}),
+          ...(options.endStyles.rotate !== undefined
+            ? { rotate: parseFloat(options.endStyles.rotate) }
+            : (options.startStyles.rotate !== undefined
+                ? { rotate: 0 }
+                : (options.r || options.rotate
+                    ? { rotate: 0 }
+                    : {}))),
+          ...(options.o || options.opacity ? { opacity: parseFloat(options.o || options.opacity) } : {}),
+          ...cleanEndStyles,
+          scrollTrigger: scrollTriggerConfig !== false ? scrollTriggerConfig : null,
+          stagger: options.stagger ? getStaggerValue(options) : 0,
+          duration: options.t_end !== undefined && options.t_start !== undefined 
+            ? Math.max(0, options.t_end - options.t_start) 
+            : (options.duration || 1),
+          delay: options.delay || 0,
+          paused: options.scroll === 'false',
+          ...(options.ease ? { ease: options.ease } : {}),
+          ...( (options.startStyles.rotate !== undefined || options.endStyles.rotate !== undefined) ? { force3D: false } : {} )
+        };
+
+        if (options.stagger) toProps.immediateRender = false;
+
+        const targets = splitText(element, options);
+        if (options.stagger) {
+          gsap.set(targets, fromProps);
+        }
+        const tween = gsap.fromTo(
+          targets,
+          fromProps,
+          addVisibilityCallback(toProps)
+        );
+        element._gsapAnimationInstance = tween;
+        if (options.scroll === 'false' && options.loop === 'true') {
+          tween.repeat(-1).yoyo(true);
+        }
+        if (options.scroll === 'false') {
+          observeIfScrollFalse(element, tween);
+        }
+
+      }); 
+    };
+
+    // --- expose the implementation as the real createDataAnimate (replacing the queueing stub) ---
+    window.createDataAnimate = window.__createDataAnimateImpl;
+
+    // --- flush any queued calls that were made before the impl existed ---
+    if (window.__createDataAnimateQueue && window.__createDataAnimateQueue.length) {
+      try {
+        window.__createDataAnimateQueue.forEach(args => {
+          try {
+            window.__createDataAnimateImpl.apply(null, args);
+          } catch (e) {
+            console.error('createDataAnimate queued call failed:', e);
+          }
+        });
+      } finally {
+        window.__createDataAnimateQueue.length = 0;
+      }
     }
 
   }, 10);

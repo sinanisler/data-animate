@@ -547,7 +547,7 @@ Add `gsap.js`, `ScrollTrigger.js`, and your `data-animate` script. Then use the 
 | --------------- | ----------------------------------------------------------------------------- | --------------------------- |
 | `style_start-*` | Initial CSS style(s) before animation. Use JS-style property names.           | `style_start-fontSize:20px` |
 | `style_end-*`   | Final CSS style(s) after animation. Use JS-style property names.              | `style_end-color:blue`      |
-| `scroll:false`  | Disables scroll trigger. Animation only runs manually/programmatically.       | `scroll:false`              |
+| `scroll:false`  | Disables ScrollTrigger. Animation plays when the element enters the viewport (via IntersectionObserver) or programmatically. | `scroll:false`              |
 | `splittext`     | Splits text for character/word/line animation. Use `true`, `word`, or `line`. | `splittext:true`            |
 | `start`         | ScrollTrigger’s start value.                                                  | `start:top 60%`             |
 | `end`           | ScrollTrigger’s end value.                                                    | `end:bottom 40%`            |
@@ -560,8 +560,8 @@ Add `gsap.js`, `ScrollTrigger.js`, and your `data-animate` script. Then use the 
 | `delay`         | Delay before animation (seconds).                                             | `delay:0.5s`                |
 | `stagger`       | Delay between staggered children (seconds).                                   | `stagger:0.2`               |
 | `scroll`        | Enables/disables scroll-triggered animation (`true` or `false`).              | `scroll:true`               |
-| `trigger`       | Enables manual triggering (e.g., by click).                                   | `trigger:true`              |
-| `scrub`         | Links animation progress to scroll (`true`, `false`, or number for delay).    | `scrub:true` / `scrub:1`    |
+| `trigger`       | Special modes: `true` builds a paused timeline for manual/programmatic play; `body` uses `document.body` as the ScrollTrigger trigger. | `trigger:true` / `trigger:body` |
+| `scrub`         | Links animation progress to scroll (`true`, `false`, or number for delay). Default is `1` when scroll is enabled. | `scrub:true` / `scrub:1`    |
 | `pin`           | Pins element during scroll.                                                   | `pin:true`                  |
 | `markers`       | Enables debugging markers.                                                    | `markers:true`              |
 | `toggleClass`   | Adds/removes a class when animation starts/ends.                              | `toggleClass:active`        |
@@ -572,6 +572,9 @@ Add `gsap.js`, `ScrollTrigger.js`, and your `data-animate` script. Then use the 
 | `ease`          | Easing function for the animation.                                            | `ease:power1.inOut`         |
 | `rand`          | Randomizes `x`, `y`, or `rotate` values if set to `true`.                     | `rand:true`                 |
 | `loop`          | Loops animation if scroll is disabled.                                        | `loop:true`                 |
+| `t_start`       | Absolute position of a step in a multi-step timeline (seconds).               | `t_start:0`                 |
+| `t_end`         | Absolute end time of a step; if both `t_start` and `t_end` are set, duration is inferred as `t_end - t_start`. | `t_end:1.5`                 |
+| `once`          | Play the scroll animation once and disable afterwards.                        | `once:true`                 |
 
 **Note:** All properties can be chained using semicolons `;` for multi-step animations.
 
@@ -582,6 +585,31 @@ Add `gsap.js`, `ScrollTrigger.js`, and your `data-animate` script. Then use the 
 * Any valid JavaScript-style CSS property can be animated.
 * If `style_start` is omitted, the current DOM style is used as the starting state.
 * You can set initial styles in your CSS framework or markup and only define the `style_end` for minimal config.
+
+#### Alternate style syntax
+
+You can also use a function-like syntax for styles:
+
+```
+style_end-scale(1),style_start-rotate(45deg)
+```
+
+#### Device breakpoints
+
+Device flags use window width to determine the current device:
+
+- Desktop: ≥ 991px
+- Tablet: > 767px and < 991px
+- Mobile: ≤ 767px
+
+#### ScrollTrigger defaults
+
+Unless overridden, the library uses sensible defaults:
+
+- `start: top 60%`
+- `end: bottom 40%`
+- `scrub: 1` (set `scrub:false` to play once when triggered)
+- `pinSpacing: margin`
 
 ---
 
@@ -598,7 +626,26 @@ You can manually trigger animations using the `data-trigger` attribute:
 * Add `data-trigger="#targetElement"` to any clickable element.
 * When clicked, it will play the GSAP animation of the target element with `data-animate`.
 
+Works with both regular scroll animations and timelines created with `trigger:true`.
+
 ---
+
+## Programmatic API
+
+You can create or update animations in JavaScript without writing GSAP code directly.
+
+```
+// Select by CSS selector, Element, or NodeList
+createDataAnimate('#hero', 'y:80,opacity:0,style_end-y:0,style_end-opacity:1');
+
+// Build a paused timeline and control it
+createDataAnimate('#card', 'trigger:true, t_start:0, x:-60, style_end-x:0; t_start:0.8, o:0, style_end-o:1');
+```
+
+Notes:
+
+- Calls made before the library is fully initialized are queued and executed automatically after load.
+- Re-invoking `createDataAnimate` on the same element replaces the previous animation safely.
 
 ## Examples
 
