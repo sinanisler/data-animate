@@ -1,5 +1,3 @@
-
-
 # data-animate
 
 **Simple, declarative scroll & GSAP animations for HTML DOM.**
@@ -652,7 +650,7 @@ You can create or update animations in JavaScript without writing GSAP code dire
 createDataAnimate('#hero', 'y:80,opacity:0,style_end-y:0,style_end-opacity:1');
 
 // Build a paused timeline and control it
-createDataAnimate('#card', 'trigger:true, t_start:0, x:-60, style_end-x:0; t_start:0.8, o:0, style_end-o:1');
+createDataAnimate('#card', 'trigger:true, t_start:0, x:-60, style_end-padding:0; t_start:0.8, opacity:0, style_end-opacity:1');
 ```
 
 Notes:
